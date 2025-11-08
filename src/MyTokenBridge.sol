@@ -40,4 +40,23 @@ contract MyTokenBridge is OApp{
             payable(msg.sender) 
         );
     }
+
+    function _lzReceive(
+        Origin calldata _origin,     // Struct with source chain ID and address
+        bytes32 /*_guid*/,          // Globally unique message ID
+        bytes calldata _payload,    // Your encoded message
+        address /*_executor*/,      // Executor address
+        bytes calldata /*_extraData*/ // Extra data
+    ) internal override {
+        // 1. The OApp contract automatically verifies the sender
+        //    (i.e., that _origin.srcEid and _origin.sender match a trusted peer)
+        //    if you have used setPeer() correctly.
+
+        // 2. Decode the message (someone burned wrapped tokens to unlock)
+        (uint amount, address to) = abi.decode(_payload, (uint, address));
+
+        // 3. Unlock and send the original tokens back to the user
+        originalToken.transfer(to, amount);
+    }
 }
+
