@@ -19,4 +19,25 @@ contract MyTokenBridge is OApp{
         originalToken = IERC20(_originalToken);
         destinationEid = _destinationEid;
     }
+
+    function lockAndSend(uint64 _amount, address _to) public payable {
+        originalToken.transferFrom(msg.sender, address(this), _amount);
+
+        bytes memory payload = abi.encode(_amount, _to);
+
+        bytes memory options = bytes(""); 
+
+        MessagingFee memory fee = _quote(destinationEid, payload, options, false);
+        if (msg.value < fee.nativeFee) {
+            revert NotEnoughNativeFee(msg.value, fee.nativeFee);
+        }
+
+        _lzSend(
+            destinationEid, 
+            payload,       
+            options,       
+            fee,            
+            payable(msg.sender) 
+        );
+    }
 }
