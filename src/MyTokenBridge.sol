@@ -9,4 +9,14 @@ contract MyTokenBridge is OApp{
     uint32 public destinationEid;
 
     error NotEnoughNativeFee(uint _currentValue, uint _requiredValue);
+
+    constructor(
+        address _lzEndpoint,        
+        address _originalToken,     
+        address _initialOwner,     
+        uint32 _destinationEid     
+    ) OApp(_lzEndpoint, _initialOwner) {
+        originalToken = IERC20(_originalToken);
+        destinationEid = _destinationEid;
+    }
 }
